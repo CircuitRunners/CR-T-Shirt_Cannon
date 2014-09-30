@@ -46,12 +46,6 @@ public class TShirtCannon extends SimpleRobot {
     
     Jaguar winch;
     
-    //CANJaguar
-    CANJaguar c1;
-    CANJaguar c2;
-    CANJaguar c3;
-    CANJaguar c4;
-    
     //Spike
     Relay launch;
     
