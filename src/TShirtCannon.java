@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Watchdog;
 import com.sun.squawk.util.MathUtils;
 import edu.wpi.first.wpilibj.CANJaguar;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.RobotDrive;
 
@@ -64,6 +65,9 @@ public class TShirtCannon extends SimpleRobot {
     //Button array
     boolean[] buttons;
     
+    //Driver Station
+    DriverStation ds;
+    
     //Driver Station LCD
     DriverStationLCD dsLCD;
     
@@ -109,9 +113,10 @@ public class TShirtCannon extends SimpleRobot {
         //Watchdog is replaced!
         driveRobot.setSafetyEnabled(true);
         
-        //Driverststion Instance
+        //Driver Station Instance
+        ds = DriverStation.getInstance();
         
-        //Construct SmartDashboard
+        //Driver Station LCD Instance
         dsLCD = DriverStationLCD.getInstance();
         
     }
@@ -140,9 +145,13 @@ public class TShirtCannon extends SimpleRobot {
             double joystick_ang = joystick.getDirectionDegrees();
             double joystick_mag = joystick.getMagnitude();
             
-            //drive(joystick_X, joystick_Y, joystick_t, joystick_h, joystick_v);
-            //Make a switch in dashbord for old code on/off?
-            driveRobot.mecanumDrive_Polar(joystick_X, joystick_Y, joystick_t);
+            if(ds.getDigitalIn(1)){
+                driveRobot.mecanumDrive_Polar(joystick_X, joystick_Y,
+                        joystick_t);
+            }else{
+                drive(joystick_X, joystick_Y, joystick_t, joystick_h,
+                        joystick_v);
+            }
             
             //Shooter
             //Launcher
