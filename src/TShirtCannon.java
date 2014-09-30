@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.Watchdog;
 import com.sun.squawk.util.MathUtils;
 import edu.wpi.first.wpilibj.CANJaguar;
 import edu.wpi.first.wpilibj.Jaguar;
+import edu.wpi.first.wpilibj.RobotDrive;
 
 public class TShirtCannon extends SimpleRobot {
    
@@ -46,6 +47,9 @@ public class TShirtCannon extends SimpleRobot {
     
     Jaguar winch;
     
+    //Robot Drive
+    RobotDrive driveRobot;
+    
     //Spike
     Relay launch;
     
@@ -69,11 +73,15 @@ public class TShirtCannon extends SimpleRobot {
     TShirtCannon(){        
         //Construct Talons
         drive1 = new Jaguar(TALON_PORT_FL);
-        drive2 = new Jaguar(TALON_PORT_FR);
-        drive3 = new Jaguar(TALON_PORT_RL);
+        drive2 = new Jaguar(TALON_PORT_RL);
+        drive3 = new Jaguar(TALON_PORT_FR);
         drive4 = new Jaguar(TALON_PORT_RR);
         
         winch = new Jaguar(WINCH_PORT);
+        
+        driveRobot = new RobotDrive(drive1, drive2 ,drive3, drive4);
+        driveRobot.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
+        driveRobot.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
         
         //Construct Relay
         launch = new Relay(8);
@@ -97,6 +105,9 @@ public class TShirtCannon extends SimpleRobot {
         //The Watchdog is born!       
         dog = Watchdog.getInstance();
         dog.setExpiration(0.5);
+        
+        //Watchdog is replaced!
+        driveRobot.setSafetyEnabled(true);
         
         //Driverststion Instance
         
@@ -126,8 +137,12 @@ public class TShirtCannon extends SimpleRobot {
             double joystick_t = joystick.getTwist();
             double joystick_h = joystick.getRawAxis(HAT_HORIZONTAL);
             double joystick_v = joystick.getRawAxis(HAT_VERTICAL);
+            double joystick_ang = joystick.getDirectionDegrees();
+            double joystick_mag = joystick.getMagnitude();
             
-            drive(joystick_X, joystick_Y, joystick_t, joystick_h, joystick_v);
+            //drive(joystick_X, joystick_Y, joystick_t, joystick_h, joystick_v);
+            //Make a switch in dashbord for old code on/off?
+            driveRobot.mecanumDrive_Polar(joystick_X, joystick_Y, joystick_t);
             
             //Shooter
             //Launcher
@@ -162,12 +177,22 @@ public class TShirtCannon extends SimpleRobot {
                 in.set(false);
                 out.set(true);
             }
+            
+            // Driver Station LCD Output
+            dsLCD.println(DriverStationLCD.Line.kUser1, 1, "Joystick X: " + joystick_X + "                 ");
+            dsLCD.println(DriverStationLCD.Line.kUser2, 1, "Joystick Y: " + joystick_Y + "                 ");
+            dsLCD.println(DriverStationLCD.Line.kUser3, 1, "Joystick t: " + joystick_t + "                 ");
+            dsLCD.println(DriverStationLCD.Line.kUser4, 1, "Ratio Value: " + ratioValue() + "                 ");
+            dsLCD.println(DriverStationLCD.Line.kUser5, 1, "Joystick Mag: " + joystick_mag + "                 ");
+            dsLCD.println(DriverStationLCD.Line.kUser6, 1, "Joystick Angle: " + joystick_ang + "                 ");
+            dsLCD.updateLCD();
+            
         }
     }
     
     //Deadband method
     public double deadband(double d){
-        if(d < DEADBAND_HIGH && d > DEADBAND_LOW){
+        if(d > DEADBAND_LOW && d < DEADBAND_HIGH){
             d = 0;
         }
         return d;
@@ -201,7 +226,7 @@ public class TShirtCannon extends SimpleRobot {
                 + deadband(-joystick_t) + deadband(joystick_v) + deadband(joystick_h)));
         drive2.set(ratioValue() * (deadband(-joystick_Y) + deadband(joystick_X)
                 + deadband(-joystick_t) + deadband(-joystick_v) + deadband(joystick_h)));
-        drive3.set(ratioValue() * (deadband(joystick_Y) + deadband(-joystick_X)
+        drive2.set(ratioValue() * (deadband(joystick_Y) + deadband(-joystick_X)
                 + deadband(-joystick_t) + deadband(joystick_v) + deadband(-joystick_h)));
         drive4.set(ratioValue() * (deadband(-joystick_Y) + deadband(-joystick_X)
                 + deadband(-joystick_t) + deadband(-joystick_v) + deadband(-joystick_h)));
