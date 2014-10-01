@@ -188,12 +188,18 @@ public class TShirtCannon extends SimpleRobot {
             }
             
             // Driver Station LCD Output
-            dsLCD.println(DriverStationLCD.Line.kUser1, 1, "Joystick X: " + joystick_X + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser2, 1, "Joystick Y: " + joystick_Y + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser3, 1, "Joystick t: " + joystick_t + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser4, 1, "Ratio Value: " + ratioValue() + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser5, 1, "Joystick Mag: " + joystick_mag + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser6, 1, "Joystick Angle: " + joystick_ang + "                 ");
+            dsLCD.println(DriverStationLCD.Line.kUser1, 1, "Joystick X: "
+                    + joystick_X + "                 ");
+            dsLCD.println(DriverStationLCD.Line.kUser2, 1, "Joystick Y: "
+                    + joystick_Y + "                 ");
+            dsLCD.println(DriverStationLCD.Line.kUser3, 1, "Joystick t: "
+                    + joystick_t + "                 ");
+            dsLCD.println(DriverStationLCD.Line.kUser4, 1, "Ratio Value: "
+                    + ratioValue() + "                 ");
+            dsLCD.println(DriverStationLCD.Line.kUser5, 1, "Joystick Mag: "
+                    + joystick_mag + "                 ");
+            dsLCD.println(DriverStationLCD.Line.kUser6, 1, "Joystick Angle: "
+                    + joystick_ang + "                 ");
             dsLCD.updateLCD();
             
         }
