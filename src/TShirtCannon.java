@@ -121,11 +121,6 @@ public class TShirtCannon extends SimpleRobot {
         
     }
     
-    //Called once each autonomous mode
-    public void autonomous() {
-        
-    }
-    
     //Called once each Teleop mode
     public void operatorControl() {
     
@@ -146,11 +141,16 @@ public class TShirtCannon extends SimpleRobot {
             double joystick_mag = joystick.getMagnitude();
             
             if(ds.getDigitalIn(1)){
-                driveRobot.mecanumDrive_Polar(joystick_X, joystick_Y,
-                        joystick_t);
-            }else{
                 drive(joystick_X, joystick_Y, joystick_t, joystick_h,
                         joystick_v);
+            }else{
+                if(ds.getDigitalIn(2)){
+                    driveRobot.mecanumDrive_Polar(trigDrive(joystick)[0],
+                            trigDrive(joystick)[1], trigDrive(joystick)[2]);
+                }else{
+                    driveRobot.mecanumDrive_Polar(joystick_X, joystick_Y,
+                            joystick_t);
+                }
             }
             
             //Shooter
@@ -228,6 +228,21 @@ public class TShirtCannon extends SimpleRobot {
     //Average
     public double avg(double a, double b){
         return (a + b) / 2;
+    }
+    
+    public double[] trigDrive(Joystick joystick){
+        double mag = hyp(deadband(joystick.getX()), deadband(joystick.getX()));
+        double angle = MathUtils.atan2(deadband(joystick.getY()),
+                deadband(joystick.getX()));
+        angle = Math.toDegrees(angle);
+        double twist = deadband(joystick.getTwist());
+        
+        double[] ans = new double[3];
+        ans[0] = mag;
+        ans[1] = angle;
+        ans[2] = twist;
+        
+        return ans;
     }
     
     public void drive(double joystick_X, double joystick_Y, double joystick_t,
