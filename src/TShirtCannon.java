@@ -146,10 +146,12 @@ public class TShirtCannon extends SimpleRobot {
             }else{
                 if(ds.getDigitalIn(2)){
                     driveRobot.mecanumDrive_Polar(trigDrive(joystick)[0],
-                            trigDrive(joystick)[1], trigDrive(joystick)[2]);
+                                                  trigDrive(joystick)[1],
+                                                  trigDrive(joystick)[2]);
                 }else{
-                    driveRobot.mecanumDrive_Polar(joystick_X, joystick_Y,
-                            joystick_t);
+                    driveRobot.mecanumDrive_Polar(ratioValue() * joystick_X,
+                                                  ratioValue() * joystick_Y,
+                                                  ratioValue() * joystick_t);
                 }
             }
             
@@ -231,7 +233,8 @@ public class TShirtCannon extends SimpleRobot {
     }
     
     public double[] trigDrive(Joystick joystick){
-        double mag = hyp(deadband(joystick.getX()), deadband(joystick.getX()));
+        double mag = ratioValue() *hyp(deadband(joystick.getX()),
+                deadband(joystick.getX()));
         double angle = MathUtils.atan2(deadband(joystick.getY()),
                 deadband(joystick.getX()));
         angle = Math.toDegrees(angle);
