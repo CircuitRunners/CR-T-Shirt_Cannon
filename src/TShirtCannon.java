@@ -255,13 +255,13 @@ public class TShirtCannon extends SimpleRobot {
         double mag = 0;
         
         //Set Talons to Joystick Values
-        drive1.set(ratioValue() * (deadband(joystick_Y) + deadband(joystick_X)
+        drive1.set(ratioValue() * (deadband(-joystick_Y) + deadband(-joystick_X)
                 + deadband(-joystick_t) + deadband(joystick_v) + deadband(joystick_h)));
-        drive2.set(ratioValue() * (deadband(-joystick_Y) + deadband(joystick_X)
+        drive2.set(ratioValue() * (deadband(joystick_Y) + deadband(-joystick_X)
                 + deadband(-joystick_t) + deadband(-joystick_v) + deadband(joystick_h)));
-        drive3.set(ratioValue() * (deadband(joystick_Y) + deadband(-joystick_X)
+        drive3.set(ratioValue() * (deadband(-joystick_Y) + deadband(joystick_X)
                 + deadband(-joystick_t) + deadband(joystick_v) + deadband(-joystick_h)));
-        drive4.set(ratioValue() * (deadband(-joystick_Y) + deadband(-joystick_X)
+        drive4.set(ratioValue() * (deadband(joystick_Y) + deadband(joystick_X)
                 + deadband(-joystick_t) + deadband(-joystick_v) + deadband(-joystick_h)));
 
         //Hat
