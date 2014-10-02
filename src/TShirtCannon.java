@@ -14,12 +14,12 @@ public class TShirtCannon extends SimpleRobot {
    
     //constants
     //Motor Controller Ports
-    public static final int TALON_PORT_FL = 1;
-    public static final int TALON_PORT_FR = 3;
-    public static final int TALON_PORT_RL = 2;
-    public static final int TALON_PORT_RR = 4;
+    public static final int JAGUAR_DRIVE_PORT_FL = 1;
+    public static final int JAGUAR_DRIVE_PORT_FR = 3;
+    public static final int JAGUAR_DRIVE_PORT_RL = 2;
+    public static final int JAGUAR_DRIVE_PORT_RR = 4;
     
-    public static final int WINCH_PORT = 5;
+    public static final int TALON_WINCH_PORT = 5;
     
     //Special Joystick Values
     public static final int TRIGGER = 1;
@@ -76,12 +76,12 @@ public class TShirtCannon extends SimpleRobot {
     
     TShirtCannon(){        
         //Construct Talons
-        drive1 = new Jaguar(TALON_PORT_FL);
-        drive2 = new Jaguar(TALON_PORT_RL);
-        drive3 = new Jaguar(TALON_PORT_FR);
-        drive4 = new Jaguar(TALON_PORT_RR);
+        drive1 = new Jaguar(JAGUAR_DRIVE_PORT_FL);
+        drive2 = new Jaguar(JAGUAR_DRIVE_PORT_RL);
+        drive3 = new Jaguar(JAGUAR_DRIVE_PORT_FR);
+        drive4 = new Jaguar(JAGUAR_DRIVE_PORT_RR);
         
-        winch = new Jaguar(WINCH_PORT);
+        winch = new Jaguar(TALON_WINCH_PORT);
         
         driveRobot = new RobotDrive(drive1, drive2 ,drive3, drive4);
         driveRobot.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
@@ -259,7 +259,7 @@ public class TShirtCannon extends SimpleRobot {
                 + deadband(-joystick_t) + deadband(joystick_v) + deadband(joystick_h)));
         drive2.set(ratioValue() * (deadband(-joystick_Y) + deadband(joystick_X)
                 + deadband(-joystick_t) + deadband(-joystick_v) + deadband(joystick_h)));
-        drive2.set(ratioValue() * (deadband(joystick_Y) + deadband(-joystick_X)
+        drive3.set(ratioValue() * (deadband(joystick_Y) + deadband(-joystick_X)
                 + deadband(-joystick_t) + deadband(joystick_v) + deadband(-joystick_h)));
         drive4.set(ratioValue() * (deadband(-joystick_Y) + deadband(-joystick_X)
                 + deadband(-joystick_t) + deadband(-joystick_v) + deadband(-joystick_h)));
