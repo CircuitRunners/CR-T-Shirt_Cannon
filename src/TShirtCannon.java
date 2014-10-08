@@ -31,8 +31,8 @@ public class TShirtCannon extends SimpleRobot {
     public static final double WINCH_SPEED = 0.4;
     
     //Deadband
-    public static final double DEADBAND_HIGH = 0.5;
-    public static final double DEADBAND_LOW = -0.5;
+    public static final double DEADBAND_HIGH = 0.25;
+    public static final double DEADBAND_LOW = -0.25;
     
     //Number of Buttons
     public static final int BUTTONS = 16;
@@ -256,14 +256,18 @@ public class TShirtCannon extends SimpleRobot {
         
         //Set Talons to Joystick Values
         drive1.set(ratioValue() * (deadband(-joystick_Y) + deadband(-joystick_X)
-                + deadband(-joystick_t) + deadband(joystick_v) + deadband(joystick_h)));
+                + deadband(-joystick_t) + deadband(joystick_v)
+                + deadband(joystick_h)));
         drive2.set(ratioValue() * (deadband(joystick_Y) + deadband(-joystick_X)
-                + deadband(-joystick_t) + deadband(-joystick_v) + deadband(joystick_h)));
+                + deadband(-joystick_t) + deadband(-joystick_v)
+                + deadband(joystick_h)));
         drive3.set(ratioValue() * (deadband(-joystick_Y) + deadband(joystick_X)
-                + deadband(-joystick_t) + deadband(joystick_v) + deadband(-joystick_h)));
+                + deadband(-joystick_t) + deadband(joystick_v)
+                + deadband(-joystick_h)));
         drive4.set(ratioValue() * (deadband(joystick_Y) + deadband(joystick_X)
-                + deadband(-joystick_t) + deadband(-joystick_v) + deadband(-joystick_h)));
-
+                + deadband(-joystick_t) + deadband(-joystick_v) 
+               + deadband(-joystick_h)));
+        
         //Hat
         if(joystick_v != 0){
             mag = ratioValue() * joystick_v;
