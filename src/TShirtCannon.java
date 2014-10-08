@@ -31,8 +31,8 @@ public class TShirtCannon extends SimpleRobot {
     public static final double WINCH_SPEED = 0.4;
     
     //Deadband
-    public static final double DEADBAND_HIGH = 0.25;
-    public static final double DEADBAND_LOW = -0.25;
+    public static final double DEADBAND_HIGH = 0.5;
+    public static final double DEADBAND_LOW = -0.5;
     
     //Number of Buttons
     public static final int BUTTONS = 16;
@@ -149,9 +149,9 @@ public class TShirtCannon extends SimpleRobot {
                                                   trigDrive(joystick)[1],
                                                   trigDrive(joystick)[2]);
                 }else{
-                    driveRobot.mecanumDrive_Polar(ratioValue() * joystick_X,
-                                                  ratioValue() * joystick_Y,
-                                                  ratioValue() * joystick_t);
+                    driveRobot.mecanumDrive_Polar(ratioValue() * deadband(joystick_X),
+                                                  ratioValue() * deadband(joystick_Y),
+                                                  ratioValue() * deadband(joystick_t));
                 }
             }
             
