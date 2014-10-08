@@ -31,8 +31,8 @@ public class TShirtCannon extends SimpleRobot {
     public static final double WINCH_SPEED = 0.4;
     
     //Deadband
-    public static final double DEADBAND_HIGH = 0.5;
-    public static final double DEADBAND_LOW = -0.5;
+    public static final double DEADBAND_HIGH = 0.25;
+    public static final double DEADBAND_LOW = -0.25;
     
     //Number of Buttons
     public static final int BUTTONS = 16;
