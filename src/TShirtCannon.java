@@ -141,7 +141,7 @@ public class TShirtCannon extends SimpleRobot {
             double joystick_mag = joystick.getMagnitude();
             
             if(ds.getDigitalIn(1)){
-                drive(joystick_X, joystick_Y, joystick_t, joystick_h,
+                additionDrive(joystick_X, joystick_Y, joystick_t, joystick_h,
                         joystick_v);
             }else{
                 if(ds.getDigitalIn(2)){
@@ -248,7 +248,7 @@ public class TShirtCannon extends SimpleRobot {
         return ans;
     }
     
-    public void addtionDrive(double joystick_X, double joystick_Y, double joystick_t,
+    public void additionDrive(double joystick_X, double joystick_Y, double joystick_t,
             double joystick_h, double joystick_v){
         
         double angle = 0;
