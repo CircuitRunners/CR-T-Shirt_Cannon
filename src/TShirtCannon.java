@@ -149,9 +149,9 @@ public class TShirtCannon extends SimpleRobot {
                                                   trigDrive(joystick)[1],
                                                   trigDrive(joystick)[2]);
                 }else{
-                    driveRobot.mecanumDrive_Polar(ratioValue() * joystick_X,
-                                                  ratioValue() * joystick_Y,
-                                                  ratioValue() * joystick_t);
+                    driveRobot.mecanumDrive_Polar(ratioValue() * deadband(joystick_X),
+                                                  ratioValue() * deadband(joystick_Y),
+                                                  ratioValue() * deadband(joystick_t));
                 }
             }
             
