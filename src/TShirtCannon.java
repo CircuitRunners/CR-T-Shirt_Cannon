@@ -144,14 +144,17 @@ public class TShirtCannon extends SimpleRobot {
                 additionDrive(joystick_X, joystick_Y, joystick_t, joystick_h,
                         joystick_v);
             }else{
+                
+                driveRobot.setMaxOutput(ratioValue());
+                
                 if(ds.getDigitalIn(2)){
                     driveRobot.mecanumDrive_Polar(trigDrive(joystick)[0],
                                                   trigDrive(joystick)[1],
                                                   trigDrive(joystick)[2]);
                 }else{
-                    driveRobot.mecanumDrive_Polar(ratioValue() * deadband(joystick_X),
-                                                  ratioValue() * deadband(joystick_Y),
-                                                  ratioValue() * deadband(joystick_t));
+                    driveRobot.mecanumDrive_Polar(deadband(joystick_X),
+                                                  deadband(joystick_Y),
+                                                  deadband(joystick_t));
                 }
             }
             
