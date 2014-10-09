@@ -248,8 +248,8 @@ public class TShirtCannon extends SimpleRobot {
         return ans;
     }
     
-    public void additionDrive(double joystick_X, double joystick_Y, double joystick_t,
-            double joystick_h, double joystick_v){
+    public void additionDrive(double joystick_X, double joystick_Y,
+            double joystick_t, double joystick_h, double joystick_v){
         
         double angle = 0;
         double mag = 0;
