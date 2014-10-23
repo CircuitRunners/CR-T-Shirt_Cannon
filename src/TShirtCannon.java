@@ -121,6 +121,13 @@ public class TShirtCannon extends SimpleRobot {
         
     }
     
+    public void robotInit(){
+        dsLCD.println(DriverStationLCD.Line.kUser1, 1,
+                "Connected to T-Shirt Cannon Robot!");
+        dsLCD.println(DriverStationLCD.Line.kUser3, 1,
+                "Make sure digital input 1 is enabled!");
+    }
+    
     //Called once each Teleop mode
     public void operatorControl() {
     
@@ -248,8 +255,11 @@ public class TShirtCannon extends SimpleRobot {
         return ans;
     }
     
-    public void additionDrive(double joystick_X, double joystick_Y,
-            double joystick_t, double joystick_h, double joystick_v){
+    public void additionDrive(double joystick_X, double joystick_Y, double joystick_t,
+            double joystick_h, double joystick_v){
+        
+        double angle = 0;
+        double mag = 0;
         
         //Set Talons to Joystick Values
         drive1.set(ratioValue() * (deadband(joystick_Y) + deadband(joystick_X)
@@ -262,7 +272,25 @@ public class TShirtCannon extends SimpleRobot {
                 + deadband(-joystick_t) + deadband(-joystick_v)
                 + deadband(joystick_h)));
         drive4.set(ratioValue() * (deadband(-joystick_Y) + deadband(-joystick_X)
-                + deadband(joystick_t) + deadband(-joystick_v) 
+                + deadband(joystick_t) + deadband(joystick_v) 
                + deadband(-joystick_h)));
+        
+        //Hat
+        if(joystick_v != 0){
+            mag = ratioValue() * joystick_v;
+            angle = MathUtils.atan2(joystick_v, joystick_h);
+        }
+        if(joystick_h != 0){
+            mag = ratioValue() * joystick_h;
+            angle = MathUtils.atan2(joystick_v, joystick_h);
+        }else if(joystick_v == 0 && joystick_h == 0){
+            mag = ratioValue() * hyp(joystick_Y, joystick_X);
+            angle = MathUtils.atan2(joystick_Y, joystick_X);
+        }
+    }
+    
+    public void disabled(){
+        dsLCD.clear();
+        dsLCD.updateLCD();
     }
 }
