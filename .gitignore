@@ -60,3 +60,7 @@ $RECYCLE.BIN/
 *.msp
 *.properties
 *.MF
+build.xml
+nbproject/private/private.xml
+nbproject/project.bak.xml
+nbproject/project.xml
