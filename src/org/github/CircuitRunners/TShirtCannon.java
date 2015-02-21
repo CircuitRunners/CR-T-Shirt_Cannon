@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.SimpleRobot;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Watchdog;
 import com.sun.squawk.util.MathUtils;
-import edu.wpi.first.wpilibj.CANJaguar;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.RobotDrive;
@@ -17,11 +16,19 @@ public class TShirtCannon extends SimpleRobot {
     //constants
     //Motor Controller Ports
     public static final int JAGUAR_DRIVE_PORT_FL = 1;
-    public static final int JAGUAR_DRIVE_PORT_FR = 3;
-    public static final int JAGUAR_DRIVE_PORT_RL = 2;
-    public static final int JAGUAR_DRIVE_PORT_RR = 4;
+    public static final int JAGUAR_DRIVE_PORT_FR = 2;
+    public static final int JAGUAR_DRIVE_PORT_RR = 3;
+    public static final int JAGUAR_DRIVE_PORT_RL = 4;
     
     public static final int TALON_WINCH_PORT = 5;
+    
+    //Relay Port
+    public static final int SPIKE_LAUNCH_PORT = 1;
+    
+    //Solenoid Ports
+    public static final int SOLENOID_LEAK_PORT = 1;
+    public static final int SOLENOID_LOAD_IN_PORT = 2;
+    public static final int SOLENOID_LOAD_OUT_PORT = 3;
     
     //Special Joystick Values
     public static final int TRIGGER = 1;
@@ -51,7 +58,7 @@ public class TShirtCannon extends SimpleRobot {
     Jaguar winch;
     
     //Robot Drive
-    RobotDrive driveRobot;
+    RobotDrive drive;
     
     //Spike
     Relay launch;
@@ -85,35 +92,27 @@ public class TShirtCannon extends SimpleRobot {
         
         winch = new Jaguar(TALON_WINCH_PORT);
         
-        driveRobot = new RobotDrive(drive1, drive2 ,drive3, drive4);
-        driveRobot.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
-        driveRobot.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
+        drive = new RobotDrive(drive1, drive2 ,drive3, drive4);
+        drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
+        drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
         
         //Construct Relay
-        launch = new Relay(8);
+        launch = new Relay(SPIKE_LAUNCH_PORT);
         
-        //Construct Aolenoid
-        leak = new Solenoid(1);
-        in = new Solenoid(2);
-        out = new Solenoid(3);
+        //Construct Solenoid
+        leak = new Solenoid(SOLENOID_LEAK_PORT);
+        in = new Solenoid(SOLENOID_LOAD_IN_PORT);
+        out = new Solenoid(SOLENOID_LOAD_OUT_PORT);
         
         //Construct Joystick
         joystick = new Joystick(1);
-        
-        //Construct Buttons
-        buttons = new boolean[BUTTONS];
-        
-        //Set buttons to false
-        for (int i = 1; i < BUTTONS; i++){
-            buttons[i] = false;
-        }
         
         //The Watchdog is born!       
         dog = Watchdog.getInstance();
         dog.setExpiration(0.5);
         
-        //Watchdog is replaced!
-        driveRobot.setSafetyEnabled(true);
+        //RobotDrive safety
+        drive.setSafetyEnabled(true);
         
         //Driver Station Instance
         ds = DriverStation.getInstance();
@@ -140,38 +139,29 @@ public class TShirtCannon extends SimpleRobot {
             double joystick_ang = joystick.getDirectionDegrees();
             double joystick_mag = joystick.getMagnitude();
             
-            additionDrive(joystick);
+            if (ds.getDigitalIn(1)) additionDrive(joystick);
+            else if (ds.getDigitalIn(2)) drive.mecanumDrive_Cartesian(joystick_X, joystick_Y, joystick_t, 0);
+            else if (ds.getDigitalIn(3)) drive.mecanumDrive_Polar(joystick_mag, joystick_ang, joystick_t);
             
             //Shooter
             //Launcher
-            if(joystick.getRawButton(TRIGGER)){
-                launch.set(Relay.Value.kForward);
-            }else{
-                launch.set(Relay.Value.kOff);
-            }
+            if (joystick.getRawButton(TRIGGER)) launch.set(Relay.Value.kForward);
+            else launch.set(Relay.Value.kOff);
                        
             //Winch
-            if(joystick.getRawButton(4)){
-                winch.set(-WINCH_SPEED);
-            }else if(joystick.getRawButton(6)){
-                winch.set(WINCH_SPEED);
-            }
-            else{
-                winch.set(0);
-            }
+            if (joystick.getRawButton(4)) winch.set(-WINCH_SPEED);
+            else if (joystick.getRawButton(6)) winch.set(WINCH_SPEED);
+            else winch.set(0);
             
             //Dump Air
-            if(joystick.getRawButton(2)){
-                leak.set(true);
-            }else{
-                leak.set(false);
-            }
+            if (joystick.getRawButton(2)) leak.set(true);
+            else leak.set(false);
             
             //Reload
-            if(joystick.getRawButton(3)){
+            if (joystick.getRawButton(3)) {
                 in.set(true);
                 out.set(false);
-            }else if(joystick.getRawButton(5)){
+            } else if (joystick.getRawButton(5)) {
                 in.set(false);
                 out.set(true);
             }
@@ -195,7 +185,7 @@ public class TShirtCannon extends SimpleRobot {
     }
     
     //Deadband method
-    public double deadband(double d){
+    public double deadband(double d) {
         if(d > DEADBAND_LOW && d < DEADBAND_HIGH){
             d = 0;
         }
@@ -203,14 +193,14 @@ public class TShirtCannon extends SimpleRobot {
     }
     
     //Set ratio coefficient
-    public double ratioValue(){
+    public double ratioValue() {
        double f = joystick.getRawAxis(AXIS_THROTTLE);
        f = (-f + 1) / 2;
        return f;
     }
     
     //Hypotenuse
-    public double hyp(double a, double b){
+    public double hyp(double a, double b) {
         return Math.sqrt(MathUtils.pow(a, 2) + MathUtils.pow(b, 2));
     }
     
@@ -240,16 +230,15 @@ public class TShirtCannon extends SimpleRobot {
                + deadband(-joystick_h)));
         
         //Hat
-        if(joystick_v != 0){
-            mag = ratioValue() * joystick_v;
-            angle = MathUtils.atan2(joystick_v, joystick_h);
-        }
-        if(joystick_h != 0){
-            mag = ratioValue() * joystick_h;
-            angle = MathUtils.atan2(joystick_v, joystick_h);
-        }else if(joystick_v == 0 && joystick_h == 0){
+        if (joystick_v == 0 && joystick_h == 0) {
             mag = ratioValue() * hyp(joystick_Y, joystick_X);
             angle = MathUtils.atan2(joystick_Y, joystick_X);
+        } else if (joystick_v != 0) {
+            mag = ratioValue() * joystick_v;
+            angle = MathUtils.atan2(joystick_v, joystick_h);
+        } else {
+            mag = ratioValue() * joystick_h;
+            angle = MathUtils.atan2(joystick_v, joystick_h);
         }
     }
 }
