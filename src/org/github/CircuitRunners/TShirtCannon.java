@@ -166,20 +166,7 @@ public class TShirtCannon extends SimpleRobot {
                 out.set(true);
             }
             
-            // Driver Station LCD Output
-            dsLCD.println(DriverStationLCD.Line.kUser1, 1, "Joystick X: "
-                    + joystick_X + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser2, 1, "Joystick Y: "
-                    + joystick_Y + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser3, 1, "Joystick t: "
-                    + joystick_t + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser4, 1, "Ratio Value: "
-                    + ratioValue() + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser5, 1, "Joystick Mag: "
-                    + joystick_mag + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser6, 1, "Joystick Angle: "
-                    + joystick_ang + "                 ");
-            dsLCD.updateLCD();
+            print();
             
         }
     }
@@ -216,17 +203,13 @@ public class TShirtCannon extends SimpleRobot {
         double mag = 0;
         
         //Set Talons to Joystick Values
-        drive1.set(ratioValue() * (deadband(joystick_Y) + deadband(joystick_X)
-                + deadband(-joystick_t) + deadband(joystick_v)
+        drive1.set(ratioValue() * (deadband(joystick_Y) + deadband(joystick_X) + deadband(-joystick_t) + deadband(joystick_v)
                 + deadband(joystick_h)));
-        drive2.set(ratioValue() * (deadband(joystick_Y) + deadband(-joystick_X)
-                + deadband(-joystick_t) + deadband(joystick_v)
+        drive2.set(ratioValue() * (deadband(joystick_Y) + deadband(-joystick_X) + deadband(-joystick_t) + deadband(joystick_v)
                 + deadband(-joystick_h)));
-        drive3.set(ratioValue() * (deadband(-joystick_Y) + deadband(joystick_X)
-                + deadband(-joystick_t) + deadband(-joystick_v)
+        drive3.set(ratioValue() * (deadband(-joystick_Y) + deadband(joystick_X) + deadband(-joystick_t) + deadband(-joystick_v)
                 + deadband(joystick_h)));
-        drive4.set(ratioValue() * (deadband(-joystick_Y) + deadband(-joystick_X)
-                + deadband(joystick_t) + deadband(joystick_v) 
+        drive4.set(ratioValue() * (deadband(-joystick_Y) + deadband(-joystick_X) + deadband(joystick_t) + deadband(joystick_v) 
                + deadband(-joystick_h)));
         
         //Hat
@@ -240,5 +223,16 @@ public class TShirtCannon extends SimpleRobot {
             mag = ratioValue() * joystick_h;
             angle = MathUtils.atan2(joystick_v, joystick_h);
         }
+    }
+    
+    public void print() {
+        // Driver Station LCD Output
+            dsLCD.println(DriverStationLCD.Line.kUser1, 1, "Joystick X: " + joystick.getX() + "                 ");
+            dsLCD.println(DriverStationLCD.Line.kUser2, 1, "Joystick Y: " + joystick.getY() + "                 ");
+            dsLCD.println(DriverStationLCD.Line.kUser3, 1, "Joystick t: " + joystick.getTwist() + "                 ");
+            dsLCD.println(DriverStationLCD.Line.kUser4, 1, "Ratio Value: " + ratioValue() + "                 ");
+            dsLCD.println(DriverStationLCD.Line.kUser5, 1, "Joystick Mag: " + joystick.getMagnitude() + "                 ");
+            dsLCD.println(DriverStationLCD.Line.kUser6, 1, "Joystick Angle: " + joystick.getDirectionDegrees() + "                 ");
+            dsLCD.updateLCD();
     }
 }
