@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SimpleRobot;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Watchdog;
 
@@ -17,7 +18,7 @@ public class TShirtCannon extends SimpleRobot {
     public static final int JAGUAR_DRIVE_PORT_FR = 1;
     public static final int JAGUAR_DRIVE_PORT_RR = 2;
     public static final int JAGUAR_DRIVE_PORT_FL = 3;
-    public static final int JAGUAR_DRIVE_PORT_RL = 4;
+    public static final int TALON_DRIVE_PORT_RL = 4;
     
     public static final int TALON_WINCH_PORT = 5;
     
@@ -31,8 +32,8 @@ public class TShirtCannon extends SimpleRobot {
     public static final double WINCH_SPEED = 0.4;
     
     //Deadband
-    public static final double DEADBAND_HIGH = 0.25;
-    public static final double DEADBAND_LOW = -0.25;
+    public static final double DEADZONE_MOVE = 0.15;
+    public static final double DEADZONE_SPIN = 0.2;
     
     //Number of Buttons
     public static final int BUTTONS = 16;
@@ -44,9 +45,9 @@ public class TShirtCannon extends SimpleRobot {
     Jaguar drive1;
     Jaguar drive2;
     Jaguar drive3;
-    Jaguar drive4;
+    Talon drive4;
     
-    Jaguar winch;
+    Talon winch;
     
     //Robot Drive
     RobotDrive driveRobot;
@@ -77,11 +78,11 @@ public class TShirtCannon extends SimpleRobot {
     TShirtCannon(){        
         //Construct Talons
         drive1 = new Jaguar(JAGUAR_DRIVE_PORT_FL);
-        drive2 = new Jaguar(JAGUAR_DRIVE_PORT_RL);
+        drive2 = new Jaguar(TALON_DRIVE_PORT_RL);
         drive3 = new Jaguar(JAGUAR_DRIVE_PORT_FR);
-        drive4 = new Jaguar(JAGUAR_DRIVE_PORT_RR);
+        drive4 = new Talon(JAGUAR_DRIVE_PORT_RR);
         
-        winch = new Jaguar(TALON_WINCH_PORT);
+        winch = new Talon(TALON_WINCH_PORT);
         
         driveRobot = new RobotDrive(drive1, drive2 ,drive3, drive4);
         driveRobot.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
@@ -157,14 +158,14 @@ public class TShirtCannon extends SimpleRobot {
                                                   trigDrive(joystick)[1],
                                                   trigDrive(joystick)[2]);
                 }else{
-                    driveRobot.mecanumDrive_Polar(ratioValue() * deadband(joystick_X),
-                                                  ratioValue() * deadband(joystick_Y),
-                                                  ratioValue() * deadband(joystick_t));
+                    driveRobot.mecanumDrive_Polar(ratioValue() * deadzoneMove(joystick_X),
+                                                  ratioValue() * deadzoneMove(joystick_Y),
+                                                  ratioValue() * deadzoneMove(joystick_t));
                 }
             }
             */
-            driveRobot.mecanumDrive_Cartesian(ratioValue() * deadband(joystick.getX()), ratioValue() *
-                    deadband(joystick.getY()), ratioValue() * deadband(joystick.getTwist()), 0);
+            driveRobot.mecanumDrive_Cartesian(ratioValue() * deadzoneMove(joystick.getY()), ratioValue() *
+                    -deadzoneMove(joystick.getX()), ratioValue() * -deadzoneSpin(joystick.getTwist()), 0);
             
             //Shooter
             //Launcher
@@ -224,9 +225,16 @@ public class TShirtCannon extends SimpleRobot {
         }
     }
     
-    //Deadband method
-    public double deadband(double d){
-        if(d > DEADBAND_LOW && d < DEADBAND_HIGH){
+    //Deadband method for move
+    public double deadzoneMove(double d){
+        if(d > -DEADZONE_MOVE && d < DEADZONE_MOVE){
+            d = 0;
+        }
+        return d;
+    }
+    
+    public double deadzoneSpin(double d) {
+        if (d > -DEADZONE_SPIN && d < DEADZONE_SPIN) {
             d = 0;
         }
         return d;
@@ -250,12 +258,12 @@ public class TShirtCannon extends SimpleRobot {
     }
     
     public double[] trigDrive(Joystick joystick){
-        double mag = ratioValue() *hyp(deadband(joystick.getX()),
-                deadband(joystick.getX()));
-        double angle = MathUtils.atan2(deadband(joystick.getY()),
-                deadband(joystick.getX()));
+        double mag = ratioValue() *hyp(deadzoneMove(joystick.getX()),
+                deadzoneMove(joystick.getX()));
+        double angle = MathUtils.atan2(deadzoneMove(joystick.getY()),
+                deadzoneMove(joystick.getX()));
         angle = Math.toDegrees(angle);
-        double twist = deadband(joystick.getTwist());
+        double twist = deadzoneMove(joystick.getTwist());
         
         double[] ans = new double[3];
         ans[0] = mag;
@@ -272,18 +280,18 @@ public class TShirtCannon extends SimpleRobot {
         double mag = 0;
         
         //Set Talons to Joystick Values
-        drive1.set(ratioValue() * (deadband(joystick_Y) + deadband(joystick_X)
-                + deadband(-joystick_t) + deadband(joystick_v)
-                + deadband(joystick_h)));
-        drive2.set(ratioValue() * (deadband(joystick_Y) + deadband(-joystick_X)
-                + deadband(-joystick_t) + deadband(joystick_v)
-                + deadband(-joystick_h)));
-        drive3.set(ratioValue() * (deadband(-joystick_Y) + deadband(joystick_X)
-                + deadband(-joystick_t) + deadband(-joystick_v)
-                + deadband(joystick_h)));
-        drive4.set(ratioValue() * (deadband(-joystick_Y) + deadband(-joystick_X)
-                + deadband(joystick_t) + deadband(joystick_v) 
-               + deadband(-joystick_h)));
+        drive1.set(ratioValue() * (deadzoneMove(joystick_Y) + deadzoneMove(joystick_X)
+                + deadzoneMove(-joystick_t) + deadzoneMove(joystick_v)
+                + deadzoneMove(joystick_h)));
+        drive2.set(ratioValue() * (deadzoneMove(joystick_Y) + deadzoneMove(-joystick_X)
+                + deadzoneMove(-joystick_t) + deadzoneMove(joystick_v)
+                + deadzoneMove(-joystick_h)));
+        drive3.set(ratioValue() * (deadzoneMove(-joystick_Y) + deadzoneMove(joystick_X)
+                + deadzoneMove(-joystick_t) + deadzoneMove(-joystick_v)
+                + deadzoneMove(joystick_h)));
+        drive4.set(ratioValue() * (deadzoneMove(-joystick_Y) + deadzoneMove(-joystick_X)
+                + deadzoneMove(joystick_t) + deadzoneMove(joystick_v) 
+               + deadzoneMove(-joystick_h)));
         
         //Hat
         if(joystick_v != 0){
