@@ -1,23 +1,23 @@
+import com.sun.squawk.util.MathUtils;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStationLCD;
+import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Relay;
+import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SimpleRobot;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Watchdog;
-import com.sun.squawk.util.MathUtils;
-import edu.wpi.first.wpilibj.CANJaguar;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Jaguar;
-import edu.wpi.first.wpilibj.RobotDrive;
 
 public class TShirtCannon extends SimpleRobot {
    
     //constants
     //Motor Controller Ports
-    public static final int JAGUAR_DRIVE_PORT_FL = 1;
-    public static final int JAGUAR_DRIVE_PORT_FR = 3;
-    public static final int JAGUAR_DRIVE_PORT_RL = 2;
-    public static final int JAGUAR_DRIVE_PORT_RR = 4;
+    public static final int JAGUAR_DRIVE_PORT_FR = 1;
+    public static final int JAGUAR_DRIVE_PORT_RR = 2;
+    public static final int JAGUAR_DRIVE_PORT_FL = 3;
+    public static final int JAGUAR_DRIVE_PORT_RL = 4;
     
     public static final int TALON_WINCH_PORT = 5;
     
@@ -120,6 +120,7 @@ public class TShirtCannon extends SimpleRobot {
         dsLCD = DriverStationLCD.getInstance();
         
     }
+   
     
     public void robotInit(){
         dsLCD.println(DriverStationLCD.Line.kUser1, 1,
@@ -146,7 +147,7 @@ public class TShirtCannon extends SimpleRobot {
             double joystick_v = joystick.getRawAxis(HAT_VERTICAL);
             double joystick_ang = joystick.getDirectionDegrees();
             double joystick_mag = joystick.getMagnitude();
-            
+            /*
             if(ds.getDigitalIn(1)){
                 additionDrive(joystick_X, joystick_Y, joystick_t, joystick_h,
                         joystick_v);
@@ -161,15 +162,24 @@ public class TShirtCannon extends SimpleRobot {
                                                   ratioValue() * deadband(joystick_t));
                 }
             }
+            */
+            driveRobot.mecanumDrive_Cartesian(ratioValue() * deadband(joystick.getX()), ratioValue() *
+                    deadband(joystick.getY()), ratioValue() * deadband(joystick.getTwist()), 0);
             
             //Shooter
             //Launcher
             if(joystick.getRawButton(TRIGGER)){
                 launch.set(Relay.Value.kForward);
+
+                Timer.delay(0.5);
+
+                in.set(false);
+                out.set(true);
+
             }else{
                 launch.set(Relay.Value.kOff);
             }
-                       
+            
             //Winch
             if(joystick.getRawButton(4)){
                 winch.set(-WINCH_SPEED);
