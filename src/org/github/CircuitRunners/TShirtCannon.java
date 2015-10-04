@@ -41,26 +41,28 @@ public class TShirtCannon extends SimpleRobot {
 		public static final int HAT_HORIZONTAL = 5;
 		public static final int HAT_VERTICAL = 6;
 		
+		//Xbox Axis Map
+		public static final int STICK_RIGHT_X = 4;
+		public static final int STICK_RIGHT_Y = 5;
+		public static final int TRIGGER = 3;
+		
 		//Xbox Button Map
-		public static final int BUTTON_A = 1
-		public static final int BUTTON_B = 2
-		public static final int BUTTON_X = 3
-		public static final int BUTTON_Y = 4
-		public static final int BUTTON_LB = 5
-		public static final int BUTTON_RB = 6
-		public static final int BUTTON_BACK = 7
-		public static final int BUTTON_START = 8
-		public static final int BUTTON_LS = 9
-		public static final int BUTTON_RS = 10
+		public static final int BUTTON_A = 1;
+		public static final int BUTTON_B = 2;
+		public static final int BUTTON_X = 3;
+		public static final int BUTTON_Y = 4;
+		public static final int BUTTON_LB = 5;
+		public static final int BUTTON_RB = 6;
+		public static final int BUTTON_BACK = 7;
+		public static final int BUTTON_START = 8;
+		public static final int BUTTON_LS = 9;
+		public static final int BUTTON_RS = 10;
     }
 	
 	//Other Contants
 	{
 		//Constant Speeds
 		public static final double WINCH_SPEED = 0.4;
-		
-		//Number of Buttons
-		public static final int BUTTONS = 16;
 		
 		//Pi
 		public static final double PI = Math.PI;
@@ -87,7 +89,7 @@ public class TShirtCannon extends SimpleRobot {
     Solenoid out;
     
     //Joystick
-    Joystick joystick;
+    Joystick controller;
     
     //Driver Station
     DriverStation ds;
@@ -120,7 +122,7 @@ public class TShirtCannon extends SimpleRobot {
         out = new Solenoid(SOLENOID_LOAD_OUT_PORT);
         
         //Construct Joystick
-        joystick = new Joystick(1);
+        controller = new Joystick(1);
         
         //The Watchdog is born!       
         dog = Watchdog.getInstance();
@@ -147,46 +149,51 @@ public class TShirtCannon extends SimpleRobot {
             //Watchdog
             dog.feed();
             
-            //Get joystick values
-            double joystick_X = joystick.getX();
-            double joystick_Y = joystick.getY();
-            double joystick_t = joystick.getTwist();
-            double joystick_ang = joystick.getDirectionDegrees();
-            double joystick_mag = joystick.getMagnitude();
+            //Get controller values
+            double joystick_X = controller.getX();
+            double joystick_Y = controller.getY();
+            double joystick_t = controller.getTwist();
+            double joystick_ang = controller.getDirectionDegrees();
+            double joystick_mag = controller.getMagnitude();
             
-			double ratioValue = (-joystick.getRawAxis(AXIS_THROTTLE) + 1) / 2;
+			double ratioValue = (-controller.getRawAxis(AXIS_THROTTLE) + 1) / 2;
 			
-            drive.mecanumDrive_Cartesian(ratioValue * -joystick_X, ratioValue * joystick_Y, ratioValue * joystick_t, 0);
-                       
+			//Get xbox values
+			double lStick_X = controller.getX();
+			double lStick_Y = controller.getY();
+			double rStick_X = controller.getRawAxis(STICK_RIGHT_X);
+			double rStick_Y = controller.getRawAxis(STICK_RIGHT_Y);
+			double trigger = controller.getRawAxis(TRIGGER);
+			
+			boolean buttonA = controller.getRawButton(BUTTON_A);
+			boolean buttonB = controller.getRawButton(BUTTON_B);
+			boolean buttonX = controller.getRawButton(BUTTON_X);
+			boolean buttonY = controller.getRawButton(BUTTON_Y);
+			boolean leftBumper = controller.getRawButton(BUTTON_LB);
+			boolean rightBumper = controller.getRawButton(BUTTON_RB);
+			boolean back = controller.getRawButton(BUTTON_BACK);
+			boolean start = controller.getRawButton(BUTTON_START);
+			
+			
+            drive.mecanumDrive_Cartesian(ratioValue * -lStick_X, ratioValue * lStick_Y, ratioValue * rStick_X, 0);
+			
             //Winch
-            winch.set(joystick.getRawButton(4) ? -WINCH_SPEED : joystick.getRawButton(6) ? WINCH_SPEED : 0);
+            winch.set(buttonY ? -WINCH_SPEED : buttonX ? WINCH_SPEED : 0);
             
             //Shooter
             //Launcher
-            launch.set(joystick.getRawButton(TRIGGER) ? Relay.Value.kForward : Relay.Value.kOff);
+            launch.set(rightBumper ? Relay.Value.kForward : Relay.Value.kOff);
             
             //Dump Air
-            leak.set(joystick.getRawButton(2) ? !leakState);
+			boolean leakState = controller.getRawButton(2) ? !leakState : leakState;
+            leak.set(leakState);
             
             //Reload
-			boolean inState = joystick.getRawButton(3) ? true : joystick.getRawButton(5) ? false : inState;
-			boolean outState = joystick.getRawButton(3) ? false : joystick.getRawButton(5) ? true : outState;
+			boolean inState = buttonA ? true : buttonB ? false : inState;
+			boolean outState = buttonA ? false : buttonB ? true : outState;
 			in.set(inState);
 			out.set(outState);
             
-            print();
-            
         }
-    }
-    
-    public void print() {
-        // Driver Station LCD Output
-            dsLCD.println(DriverStationLCD.Line.kUser1, 1, "Joystick X: " + joystick.getX() + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser2, 1, "Joystick Y: " + joystick.getY() + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser3, 1, "Joystick t: " + joystick.getTwist() + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser4, 1, "Ratio Value: " + ratioValue() + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser5, 1, "Joystick Mag: " + joystick.getMagnitude() + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser6, 1, "Joystick Angle: " + joystick.getDirectionDegrees() + "                 ");
-            dsLCD.updateLCD();
     }
 }	
