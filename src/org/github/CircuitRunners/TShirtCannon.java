@@ -14,48 +14,66 @@ import edu.wpi.first.wpilibj.RobotDrive;
 public class TShirtCannon extends SimpleRobot {
    
     //constants
-    //Motor Controller Ports
-    public static final int JAGUAR_DRIVE_PORT_FL = 1;
-    public static final int JAGUAR_DRIVE_PORT_FR = 2;
-    public static final int JAGUAR_DRIVE_PORT_RR = 3;
-    public static final int JAGUAR_DRIVE_PORT_RL = 4;
+	//Ports
+	{
+		//Motor Controller Ports
+		public static final int JAGUAR_DRIVE_PORT_FL = 1;
+		public static final int JAGUAR_DRIVE_PORT_FR = 2;
+		public static final int JAGUAR_DRIVE_PORT_RR = 3;
+		public static final int JAGUAR_DRIVE_PORT_RL = 4;
+		
+		public static final int TALON_WINCH_PORT = 5;
+		
+		//Relay Port
+		public static final int SPIKE_LAUNCH_PORT = 1;
+		
+		//Solenoid Ports
+		public static final int SOLENOID_LEAK_PORT = 1;
+		public static final int SOLENOID_LOAD_IN_PORT = 2;
+		public static final int SOLENOID_LOAD_OUT_PORT = 3;
+    }
+	
+	//Controller
+	{
+		//Special Joystick Values
+		public static final int TRIGGER = 1;
+		public static final int AXIS_THROTTLE = 4;
+		public static final int HAT_HORIZONTAL = 5;
+		public static final int HAT_VERTICAL = 6;
+		
+		//Xbox Button Map
+		public static final int BUTTON_A = 1
+		public static final int BUTTON_B = 2
+		public static final int BUTTON_X = 3
+		public static final int BUTTON_Y = 4
+		public static final int BUTTON_LB = 5
+		public static final int BUTTON_RB = 6
+		public static final int BUTTON_BACK = 7
+		public static final int BUTTON_START = 8
+		public static final int BUTTON_LS = 9
+		public static final int BUTTON_RS = 10
+    }
+	
+	//Other Contants
+	{
+		//Constant Speeds
+		public static final double WINCH_SPEED = 0.4;
+		
+		//Number of Buttons
+		public static final int BUTTONS = 16;
+		
+		//Pi
+		public static final double PI = Math.PI;
+	}
     
-    public static final int TALON_WINCH_PORT = 5;
-    
-    //Relay Port
-    public static final int SPIKE_LAUNCH_PORT = 1;
-    
-    //Solenoid Ports
-    public static final int SOLENOID_LEAK_PORT = 1;
-    public static final int SOLENOID_LOAD_IN_PORT = 2;
-    public static final int SOLENOID_LOAD_OUT_PORT = 3;
-    
-    //Special Joystick Values
-    public static final int TRIGGER = 1;
-    public static final int AXIS_THROTTLE = 4;
-    public static final int HAT_HORIZONTAL = 5;
-    public static final int HAT_VERTICAL = 6;
-    
-    //Constant Speeds
-    public static final double WINCH_SPEED = 0.4;
-    
-    //Deadband
-    public static final double DEADBAND_HIGH = 0.25;
-    public static final double DEADBAND_LOW = -0.25;
-    
-    //Number of Buttons
-    public static final int BUTTONS = 16;
-    
-    //Pi
-    public static final double PI = Math.PI;
-    
+	//Objects
     //Motor Contollers
     Jaguar drive1;
     Jaguar drive2;
     Jaguar drive3;
     Jaguar drive4;
     
-    Jaguar winch;
+    Talon winch;
     
     //Robot Drive
     RobotDrive drive;
@@ -71,9 +89,6 @@ public class TShirtCannon extends SimpleRobot {
     //Joystick
     Joystick joystick;
     
-    //Button array
-    boolean[] buttons;
-    
     //Driver Station
     DriverStation ds;
     
@@ -83,14 +98,14 @@ public class TShirtCannon extends SimpleRobot {
     //Watchdog
     Watchdog dog;
     
-    TShirtCannon(){        
+    public TShirtCannon(){        
         //Construct Talons
         drive1 = new Jaguar(JAGUAR_DRIVE_PORT_FL);
         drive2 = new Jaguar(JAGUAR_DRIVE_PORT_RL);
         drive3 = new Jaguar(JAGUAR_DRIVE_PORT_FR);
         drive4 = new Jaguar(JAGUAR_DRIVE_PORT_RR);
         
-        winch = new Jaguar(TALON_WINCH_PORT);
+        winch = new Talon(TALON_WINCH_PORT);
         
         drive = new RobotDrive(drive1, drive2 ,drive3, drive4);
         drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
@@ -139,89 +154,28 @@ public class TShirtCannon extends SimpleRobot {
             double joystick_ang = joystick.getDirectionDegrees();
             double joystick_mag = joystick.getMagnitude();
             
-            if (ds.getDigitalIn(1)) additionDrive(joystick);
-            else if (ds.getDigitalIn(2)) drive.mecanumDrive_Cartesian(joystick_X, joystick_Y, joystick_t, 0);
-            else if (ds.getDigitalIn(3)) drive.mecanumDrive_Polar(joystick_mag, joystick_ang, joystick_t);
+			double ratioValue = (-joystick.getRawAxis(AXIS_THROTTLE) + 1) / 2;
+			
+            drive.mecanumDrive_Cartesian(ratioValue * -joystick_X, ratioValue * joystick_Y, ratioValue * joystick_t, 0);
+                       
+            //Winch
+            winch.set(joystick.getRawButton(4) ? -WINCH_SPEED : joystick.getRawButton(6) ? WINCH_SPEED : 0);
             
             //Shooter
             //Launcher
-            if (joystick.getRawButton(TRIGGER)) launch.set(Relay.Value.kForward);
-            else launch.set(Relay.Value.kOff);
-                       
-            //Winch
-            if (joystick.getRawButton(4)) winch.set(-WINCH_SPEED);
-            else if (joystick.getRawButton(6)) winch.set(WINCH_SPEED);
-            else winch.set(0);
+            launch.set(joystick.getRawButton(TRIGGER) ? Relay.Value.kForward : Relay.Value.kOff);
             
             //Dump Air
-            if (joystick.getRawButton(2)) leak.set(true);
-            else leak.set(false);
+            leak.set(joystick.getRawButton(2) ? !leakState);
             
             //Reload
-            if (joystick.getRawButton(3)) {
-                in.set(true);
-                out.set(false);
-            } else if (joystick.getRawButton(5)) {
-                in.set(false);
-                out.set(true);
-            }
+			boolean inState = joystick.getRawButton(3) ? true : joystick.getRawButton(5) ? false : inState;
+			boolean outState = joystick.getRawButton(3) ? false : joystick.getRawButton(5) ? true : outState;
+			in.set(inState);
+			out.set(outState);
             
             print();
             
-        }
-    }
-    
-    //Deadband method
-    public double deadband(double d) {
-        if(d > DEADBAND_LOW && d < DEADBAND_HIGH){
-            d = 0;
-        }
-        return d;
-    }
-    
-    //Set ratio coefficient
-    public double ratioValue() {
-       double f = joystick.getRawAxis(AXIS_THROTTLE);
-       f = (-f + 1) / 2;
-       return f;
-    }
-    
-    //Hypotenuse
-    public double hyp(double a, double b) {
-        return Math.sqrt(MathUtils.pow(a, 2) + MathUtils.pow(b, 2));
-    }
-    
-    public void additionDrive(Joystick joystick){
-        
-        double joystick_X = joystick.getX();
-        double joystick_Y = joystick.getY();
-        double joystick_t = joystick.getRawAxis(AXIS_THROTTLE);
-        double joystick_v = joystick.getRawAxis(HAT_VERTICAL);
-        double joystick_h = joystick.getRawAxis(HAT_HORIZONTAL);
-        
-        double angle = 0;
-        double mag = 0;
-        
-        //Set Talons to Joystick Values
-        drive1.set(ratioValue() * (deadband(joystick_Y) + deadband(joystick_X) + deadband(-joystick_t) + deadband(joystick_v)
-                + deadband(joystick_h)));
-        drive2.set(ratioValue() * (deadband(joystick_Y) + deadband(-joystick_X) + deadband(-joystick_t) + deadband(joystick_v)
-                + deadband(-joystick_h)));
-        drive3.set(ratioValue() * (deadband(-joystick_Y) + deadband(joystick_X) + deadband(-joystick_t) + deadband(-joystick_v)
-                + deadband(joystick_h)));
-        drive4.set(ratioValue() * (deadband(-joystick_Y) + deadband(-joystick_X) + deadband(joystick_t) + deadband(joystick_v) 
-               + deadband(-joystick_h)));
-        
-        //Hat
-        if (joystick_v == 0 && joystick_h == 0) {
-            mag = ratioValue() * hyp(joystick_Y, joystick_X);
-            angle = MathUtils.atan2(joystick_Y, joystick_X);
-        } else if (joystick_v != 0) {
-            mag = ratioValue() * joystick_v;
-            angle = MathUtils.atan2(joystick_v, joystick_h);
-        } else {
-            mag = ratioValue() * joystick_h;
-            angle = MathUtils.atan2(joystick_v, joystick_h);
         }
     }
     
@@ -235,4 +189,4 @@ public class TShirtCannon extends SimpleRobot {
             dsLCD.println(DriverStationLCD.Line.kUser6, 1, "Joystick Angle: " + joystick.getDirectionDegrees() + "                 ");
             dsLCD.updateLCD();
     }
-}
+}	
