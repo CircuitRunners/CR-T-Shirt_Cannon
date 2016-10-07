@@ -1,68 +1,55 @@
 package org.github.CircuitRunners;
 
-import edu.wpi.first.wpilibj.DriverStationLCD;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Relay;
-import edu.wpi.first.wpilibj.SimpleRobot;
-import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.Watchdog;
-import com.sun.squawk.util.MathUtils;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Jaguar;
-import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 
-public class TShirtCannon extends SimpleRobot {
-   
-    //constants
-	//Ports
-            //Motor Controller Ports
-            public static final int JAGUAR_DRIVE_PORT_FL = 1;
-            public static final int JAGUAR_DRIVE_PORT_FR = 2;
-            public static final int JAGUAR_DRIVE_PORT_RR = 3;
-            public static final int JAGUAR_DRIVE_PORT_RL = 4;
+public class TShirtCannon extends IterativeRobot {
 
-            public static final int TALON_WINCH_PORT = 5;
+    // # Constants
+	// ## Ports
+    // Motor Controller Ports
+    public static final int JAGUAR_DRIVE_PORT_FL = 1;
+    public static final int JAGUAR_DRIVE_PORT_FR = 2;
+    public static final int JAGUAR_DRIVE_PORT_RR = 3;
+    public static final int JAGUAR_DRIVE_PORT_RL = 4;
 
-            //Relay Port
-            public static final int SPIKE_LAUNCH_PORT = 1;
+    public static final int TALON_WINCH_PORT = 5;
 
-            //Solenoid Ports
-            public static final int SOLENOID_LEAK_PORT = 1;
-            public static final int SOLENOID_LOAD_IN_PORT = 2;
-            public static final int SOLENOID_LOAD_OUT_PORT = 3;
+    // Relay Port
+    public static final int SPIKE_LAUNCH_PORT = 1;
+
+    // Solenoid Ports
+    public static final int SOLENOID_LEAK_PORT = 1;
+    public static final int SOLENOID_LOAD_IN_PORT = 2;
+    public static final int SOLENOID_LOAD_OUT_PORT = 3;
 	
-	//Controller
-		//Special Joystick Values
-            public static final int TRIGGER = 1;
-            public static final int AXIS_THROTTLE = 4;
-            public static final int HAT_HORIZONTAL = 5;
-            public static final int HAT_VERTICAL = 6;
+	// ## Controller
+    // Special Joystick Values
+    public static final int TRIGGER = 1;
+    public static final int AXIS_THROTTLE = 4;
+    /* public static final int HAT_HORIZONTAL = 5;
+    public static final int HAT_VERTICAL = 6; */
 
-            //Xbox Button Map
-            public static final int BUTTON_A = 1;
-            public static final int BUTTON_B = 2;
-            public static final int BUTTON_X = 3;
-            public static final int BUTTON_Y = 4;
-            public static final int BUTTON_LB = 5;
-            public static final int BUTTON_RB = 6;
-            public static final int BUTTON_BACK = 7;
-            public static final int BUTTON_START = 8;
-            public static final int BUTTON_LS = 9;
-            public static final int BUTTON_RS = 10;
-	
-	//Other Contants
-            //Constant Speeds
-            public static final double WINCH_SPEED = 0.4;
+    // Xbox Button Map
+    /* public static final int BUTTON_A = 1;
+    public static final int BUTTON_B = 2;
+    public static final int BUTTON_X = 3;
+    public static final int BUTTON_Y = 4;
+    public static final int BUTTON_LB = 5;
+    public static final int BUTTON_RB = 6;
+    public static final int BUTTON_BACK = 7;
+    public static final int BUTTON_START = 8;
+    public static final int BUTTON_LS = 9;
+    public static final int BUTTON_RS = 10; */
 
-            //Number of Buttons
-            public static final int BUTTONS = 16;
+    // ## Constant Speeds
+    public static final double WINCH_SPEED = 0.4;
 
-            //Pi
-            public static final double PI = Math.PI;
+    // ## Number of Buttons
+    // public static final int BUTTONS = 16;
     
-    //Objects
-    //Motor Contollers
+    // # Objects
+    // Motor Contollers
     Jaguar drive1;
     Jaguar drive2;
     Jaguar drive3;
@@ -70,31 +57,26 @@ public class TShirtCannon extends SimpleRobot {
     
     Talon winch;
     
-    //Robot Drive
+    // Robot Drive
     RobotDrive drive;
     
-    //Spike
+    // Spike
     Relay launch;
     
-    //Solenoid
+    // Solenoid
     Solenoid leak;
     Solenoid in;
     Solenoid out;
     
-    //Joystick
+    // Joystick
     Joystick joystick;
     
-    //Driver Station
-    DriverStation ds;
+    // Driver Station
+    // DriverStation ds;
     
-    //Driver Station LCD
-    DriverStationLCD dsLCD;
-    
-    //Watchdog
-    Watchdog dog;
-    
-    public TShirtCannon(){        
-        //Construct Talons
+    @Override
+    public void robotInit() {
+        // Construct Talons
         drive1 = new Jaguar(JAGUAR_DRIVE_PORT_FL);
         drive2 = new Jaguar(JAGUAR_DRIVE_PORT_RL);
         drive3 = new Jaguar(JAGUAR_DRIVE_PORT_FR);
@@ -102,84 +84,73 @@ public class TShirtCannon extends SimpleRobot {
         
         winch = new Talon(TALON_WINCH_PORT);
         
-        drive = new RobotDrive(drive1, drive2 ,drive3, drive4);
-        drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
-        drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
+        drive = new RobotDrive(drive1, drive2, drive3, drive4);
+        drive.setInvertedMotor(MotorType.kFrontRight, true);
+        drive.setInvertedMotor(MotorType.kRearRight, true);
         
-        //Construct Relay
+        // Construct Relay
         launch = new Relay(SPIKE_LAUNCH_PORT);
         
-        //Construct Solenoid
+        // Construct Solenoid
         leak = new Solenoid(SOLENOID_LEAK_PORT);
         in = new Solenoid(SOLENOID_LOAD_IN_PORT);
         out = new Solenoid(SOLENOID_LOAD_OUT_PORT);
         
-        //Construct Joystick
+        // Construct Joystick
         joystick = new Joystick(1);
-        
-        //The Watchdog is born!       
-        dog = Watchdog.getInstance();
-        dog.setExpiration(0.5);
         
         //RobotDrive safety
         drive.setSafetyEnabled(true);
         
         //Driver Station Instance
-        ds = DriverStation.getInstance();
-        
-        //Driver Station LCD Instance
-        dsLCD = DriverStationLCD.getInstance();
-        
+        // ds = DriverStation.getInstance();
     }
-    
-    //Called once each Teleop mode
-    public void operatorControl() {
-    
-        //While in test mode
-        while(isOperatorControl()){
-            
-            //Drive
-            //Watchdog
-            dog.feed();
-            
-            //Get joystick values
-            double joystick_X = joystick.getX();
-            double joystick_Y = joystick.getY();
-            double joystick_t = joystick.getTwist();
-            double joystick_ang = joystick.getDirectionDegrees();
-            double joystick_mag = joystick.getMagnitude();
-            
-            double ratioValue = (-joystick.getRawAxis(AXIS_THROTTLE) + 1) / 2;
-			
-            drive.mecanumDrive_Cartesian(ratioValue * -joystick_X, ratioValue * joystick_Y, ratioValue * joystick_t, 0);
-                       
-            //Winch
-            winch.set(joystick.getRawButton(4) ? -WINCH_SPEED : joystick.getRawButton(6) ? WINCH_SPEED : 0);
-            
-            //Shooter
-            //Launcher
-            launch.set(joystick.getRawButton(TRIGGER) ? Relay.Value.kForward : Relay.Value.kOff);
-            
-            //Dump Air
-            leak.set(joystick.getRawButton(2) ? !leak.get() : leak.get());
-            
-            //Reload
-            in.set(joystick.getRawButton(3) ? true : joystick.getRawButton(5) ? false : in.get());
-            out.set(joystick.getRawButton(3) ? false : joystick.getRawButton(5) ? true : out.get());
-            
-            print();
-            
+
+    // Called periodically while in teleop mode
+    public void teleopPeriodic() {
+        // Get joystick values
+        double joystick_X = joystick.getX();
+        double joystick_Y = joystick.getY();
+        double joystick_t = joystick.getTwist();
+        //double joystick_ang = joystick.getDirectionDegrees();
+        double joystick_mag = joystick.getMagnitude();
+
+        double ratioValue = (-joystick.getRawAxis(AXIS_THROTTLE) + 1) / 2;
+
+        if (joystick_mag <= 0.1) {
+            joystick_X = 0;
+            joystick_Y = 0;
         }
+
+        if (joystick_t <= 0.1 || joystick_t >= -0.1) {
+            joystick_t = 0;
+        }
+
+        drive.mecanumDrive_Cartesian(ratioValue * -joystick_X, ratioValue * joystick_Y, ratioValue * joystick_t, 0);
+
+        // Winch
+        winch.set(joystick.getRawButton(4) ? -WINCH_SPEED : joystick.getRawButton(6) ? WINCH_SPEED : 0);
+
+        // Shooter
+        // Launcher
+        launch.set(joystick.getRawButton(TRIGGER) ? Relay.Value.kForward : Relay.Value.kOff);
+
+        // Dump Air
+        leak.set(joystick.getRawButton(2) != leak.get());
+
+        // Reload
+        in.set(joystick.getRawButton(3) || (!joystick.getRawButton(5) && in.get()));
+        out.set(!joystick.getRawButton(3) && (joystick.getRawButton(5) || out.get()));
     }
     
-    public void print() {
+    /*public void print() {
         // Driver Station LCD Output
-            dsLCD.println(DriverStationLCD.Line.kUser1, 1, "Joystick X: " + joystick.getX() + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser2, 1, "Joystick Y: " + joystick.getY() + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser3, 1, "Joystick t: " + joystick.getTwist() + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser4, 1, "Ratio Value: " + (joystick.getThrottle()+1)/2 + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser5, 1, "Joystick Mag: " + joystick.getMagnitude() + "                 ");
-            dsLCD.println(DriverStationLCD.Line.kUser6, 1, "Joystick Angle: " + joystick.getDirectionDegrees() + "                 ");
-            dsLCD.updateLCD();
-    }
+        dsLCD.println(DriverStationLCD.Line.kUser1, 1, "Joystick X: " + joystick.getX() + "                 ");
+        dsLCD.println(DriverStationLCD.Line.kUser2, 1, "Joystick Y: " + joystick.getY() + "                 ");
+        dsLCD.println(DriverStationLCD.Line.kUser3, 1, "Joystick t: " + joystick.getTwist() + "                 ");
+        dsLCD.println(DriverStationLCD.Line.kUser4, 1, "Ratio Value: " + (joystick.getThrottle()+1)/2 + "                 ");
+        dsLCD.println(DriverStationLCD.Line.kUser5, 1, "Joystick Mag: " + joystick.getMagnitude() + "                 ");
+        dsLCD.println(DriverStationLCD.Line.kUser6, 1, "Joystick Angle: " + joystick.getDirectionDegrees() + "                 ");
+        dsLCD.updateLCD();
+    }*/
 }
